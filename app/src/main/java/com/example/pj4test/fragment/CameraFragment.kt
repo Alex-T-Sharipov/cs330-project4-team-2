@@ -182,6 +182,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
         // Pass Bitmap and rotation to the object detector helper for processing and detection
         personClassifier.detect(bitmapBuffer, imageRotation)
+
     }
 
     // Update UI after objects have been detected. Extracts original image height/width
@@ -201,15 +202,15 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
             )
             
             // find at least one bounding box of the person
-            val isPersonDetected: Boolean = results!!.find { it.categories[0].label == "person" } != null
+            val isPersonDetected: Boolean = results!!.find { it.categories[0].label == "tv" } != null
             
             // change UI according to the result
             if (isPersonDetected) {
-                personView.text = "PERSON"
+                personView.text = "Fire image detected!"
                 personView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.activeTextColor)
             } else {
-                personView.text = "NO PERSON"
+                personView.text = "All calm, no fire yet!"
                 personView.setBackgroundColor(ProjectConfiguration.idleBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.idleTextColor)
             }

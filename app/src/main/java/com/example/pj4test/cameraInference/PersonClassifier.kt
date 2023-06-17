@@ -19,24 +19,26 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
-import com.example.pj4test.audioInference.SnapClassifier
-import org.tensorflow.lite.gpu.CompatibilityList
+
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import com.example.pj4test.ml.EfficientnetLite0Fp322
 
 class PersonClassifier {
     // Libraries for object detection
     lateinit var objectDetector: ObjectDetector
+    lateinit var model: EfficientnetLite0Fp322
 
     // Listener that will be handle the result of this classifier
     private var objectDetectorListener: DetectorListener? = null
 
     fun initialize(context: Context) {
         setupObjectDetector(context)
+        model = EfficientnetLite0Fp322.newInstance(context)
     }
 
     // Initialize the object detector using current settings on the
@@ -53,6 +55,9 @@ class PersonClassifier {
         // Set general detection options, including number of used threads
         val baseOptionsBuilder = BaseOptions.builder().setNumThreads(NUM_THREADS)
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
+//        val modelFile = context.assets.openFd("/Users/alexanders/AndroidStudioProjects/cs330-project4/app/src/main/assets/efficientnet_lite0_fp32_2.tflite")
+//        val options = Model.Options.Builder().setDevice(Model.Device.CPU).build()
+//        model = Model.newInstance(context, modelFile, options)
 
         try {
             objectDetector =
@@ -80,6 +85,17 @@ class PersonClassifier {
 
         // Preprocess the image and convert it into a TensorImage for detection.
         val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
+
+
+
+
+
+// Runs model inference and gets result.
+        val outputs = model.process(tensorImage)
+        val probability = outputs.probabilityAsCategoryList
+
+// Releases model resources if no longer used.
+
 
         val results = objectDetector.detect(tensorImage)
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
