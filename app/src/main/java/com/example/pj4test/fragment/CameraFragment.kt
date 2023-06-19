@@ -16,6 +16,7 @@
 package com.example.pj4test.fragment
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothSocket
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Build
@@ -53,6 +54,7 @@ import com.example.pj4test.fragment.GlobalVariables
 import java.time.LocalDateTime
 import java.util.Calendar
 import java.time.Duration
+import com.example.pj4test.GlobalSocket
 
 class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     private val TAG = "CameraFragment"
@@ -202,7 +204,6 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         savedInstanceState: Bundle?
     ): View {
         _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
-
         return fragmentCameraBinding.root
     }
 
@@ -416,6 +417,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
                         if((fed == 0 )or (timeDifference >= sixHoursInMillis)){
                             fed += 1
+                            dispenseFood();
                             lastUpdateTime = System.currentTimeMillis()
                             //Log.d("APP2", checkIfSixHoursPassed(last_fed).toString())
 
@@ -448,4 +450,15 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun dispenseFood() {
+        try {
+            val command = "DISPENSE"
+            GlobalSocket.myGlobalSocket.outputStream.write(command.toByteArray())
+        } catch (e: Exception) {
+            Log.d("TAG", "couldn't send command")
+            return
+        }
+    }
+
 }

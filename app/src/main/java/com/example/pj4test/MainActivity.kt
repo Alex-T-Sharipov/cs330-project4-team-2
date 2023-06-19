@@ -23,6 +23,12 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 import java.util.*
 
+class GlobalSocket {
+    companion object {
+        lateinit var myGlobalSocket: BluetoothSocket
+    }
+}
+
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
 
@@ -69,8 +75,9 @@ class MainActivity : AppCompatActivity() {
             }
             device?.let {
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
+                GlobalSocket.myGlobalSocket = bluetoothSocket
                 Log.d(TAG, "socket obtained")
-                bluetoothSocket.connect()
+                GlobalSocket.myGlobalSocket.connect()
                 Log.d(TAG, "socket connected")
                 runOnUiThread {
                     setContentView(R.layout.activity_main)
@@ -79,13 +86,9 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             // Handle connection error
             Log.d(TAG, "some error")
-            runOnUiThread {
-                setContentView(R.layout.bluetooth_activity)
-            }
-            Timer().schedule(5000) {
-                runOnUiThread {
-                    setContentView(R.layout.activity_main)
-                }
+            setContentView(R.layout.bluetooth_activity)
+            Timer().schedule(5000){
+                setContentView(R.layout.activity_main)
             }
 
         }

@@ -109,6 +109,7 @@ class PersonClassifier {
     }
 
     interface DetectorListener {
+
         fun onObjectDetectionError(error: String)
         fun onObjectDetectionResults(
             results: MutableList<Detection>?,
