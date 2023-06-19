@@ -1,24 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
-    ~
-    ~ Licensed under the Apache License, Version 2.0 (the "License");
-    ~ you may not use this file except in compliance with the License.
-    ~ You may obtain a copy of the License at
-    ~
-    ~       http://www.apache.org/licenses/LICENSE-2.0
-    ~
-    ~ Unless required by applicable law or agreed to in writing, software
-    ~ distributed under the License is distributed on an "AS IS" BASIS,
-    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    ~ See the License for the specific language governing permissions and
-    ~ limitations under the License.
--->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/camera_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/pastel_background">
 
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
@@ -27,22 +13,36 @@
         android:layout_marginBottom="60dp"
         app:scaleType="fillStart">
 
-    </androidx.camera.view.PreviewView>
+        <com.example.pj4test.OverlayView
+            android:id="@+id/overlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp" />
 
-    <com.example.pj4test.OverlayView
-        android:id="@+id/overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="60dp" />
+    </androidx.camera.view.PreviewView>
 
     <TextView
         android:id="@+id/PersonView"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="59dp"
         android:layout_gravity="bottom"
-        android:background="@color/white"
+        android:background="@drawable/rounded_background"
         android:gravity="center"
-        android:text="NO PERSON"
-        android:textColor="@color/black" />
+        android:text="No pet here!"
+        android:textColor="@color/pastel_text"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/StatsView"
+        android:layout_width="108dp"
+        android:layout_height="61dp"
+        android:background="@drawable/rounded_background"
+        android:gravity="center"
+        android:text="№ fed: 0\n№ asked: 0"
+        android:textColor="@color/pastel_text"
+        android:textSize="14sp"
+        app:layout_anchor="@+id/view_finder"
+        app:layout_anchorGravity="top|center" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

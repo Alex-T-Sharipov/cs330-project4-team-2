@@ -11,6 +11,7 @@ import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 
 
+
 class SnapClassifier {
     // Libraries for audio classification
     lateinit var classifier: AudioClassifier
@@ -95,11 +96,50 @@ class SnapClassifier {
      */
     fun inference(): Float {
         tensor.load(recorder)
-        Log.d(TAG, tensor.tensorBuffer.shape.joinToString(","))
+        // Log.d(TAG, tensor.tensorBuffer.shape.joinToString(","))
         val output = classifier.classify(tensor)
-        Log.d(TAG, output.toString())
+//        val categories = out
+        val top5Probabilities = output[0].categories.sortedByDescending { it.score }.take(5)
+        // Log.d(TAG, top5Probabilities.toString())
+//        for (element in output) {
+//            Log.d(TAG, element.categories[2].score.toString())
+//        }
 
-        return output[0].categories.find { it.label == "Finger snapping" }!!.score
+        val data = listOf(
+            "animal",
+            "Domestic animals, pets",
+            "Dog",
+            "Bark",
+            "Howl",
+            "Bow-wow",
+            "Growling",
+            "Whimper (dog)",
+            "Cat",
+            "Purr",
+            "Meow",
+            "Hiss",
+            "Caterwaul",
+            "Livestock, farm animals, working animals"
+        )
+        var score = (-1.0).toFloat()
+        var current_score = (-1.0).toFloat()
+
+        for (result in top5Probabilities) {
+            Log.d(TAG, result.label.toString())
+            if ( result.label.contains("animal", ignoreCase = true)) {
+                Log.d(TAG, "My new label: ${result.label}, Probability: ${result.score}")
+                current_score = result.score
+                if(current_score > score){
+                    score = current_score
+                }
+
+            }
+        }
+
+
+
+        return score
+        // return output[0].categories.find { it.label == "Finger snapping" }!!.score
     }
 
     fun startInferencing() {
@@ -149,7 +189,7 @@ class SnapClassifier {
     companion object {
         const val TAG = "HornClassifier"
 
-        const val REFRESH_INTERVAL_MS = 33L
+        const val REFRESH_INTERVAL_MS = 333L
         const val YAMNET_MODEL = "yamnet_classification.tflite"
 
         const val THRESHOLD = 0.3f

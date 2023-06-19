@@ -18,6 +18,7 @@ package com.example.pj4test.fragment
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -33,15 +35,24 @@ import androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import com.example.pj4test.ProjectConfiguration
+import com.example.pj4test.R
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import com.example.pj4test.cameraInference.PersonClassifier
 import com.example.pj4test.databinding.FragmentCameraBinding
+import com.example.pj4test.ml.EfficientnetLite0Fp322
 import org.tensorflow.lite.task.vision.detector.Detection
+import com.example.pj4test.databinding.FragmentAudioBinding
+import com.example.pj4test.fragment.GlobalVariables
+import java.time.LocalDateTime
+import java.util.Calendar
+import java.time.Duration
 
 class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     private val TAG = "CameraFragment"
@@ -52,13 +63,128 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         get() = _fragmentCameraBinding!!
     
     private lateinit var personView: TextView
+    private lateinit var statsView: TextView
     
     private lateinit var personClassifier: PersonClassifier
     private lateinit var bitmapBuffer: Bitmap
     private var preview: Preview? = null
+    var have_seen_the_dog = false
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
-
+    var lastUpdateTime: Long = System.currentTimeMillis()// The timestamp of the last variable update
+    var petDetectionStartTime = System.currentTimeMillis()
+    val dogList = listOf(
+        "Chihuahua",
+        "Japanese spaniel",
+        "Maltese dog, Maltese terrier, Maltese",
+        "Pekinese, Pekingese, Peke",
+        "Shih-Tzu",
+        "Blenheim spaniel",
+        "papillon",
+        "toy terrier",
+        "Rhodesian ridgeback",
+        "Afghan hound, Afghan",
+        "basset, basset hound",
+        "beagle",
+        "bloodhound, sleuthhound",
+        "bluetick",
+        "black-and-tan coonhound",
+        "Walker hound, Walker foxhound",
+        "English foxhound",
+        "redbone",
+        "borzoi, Russian wolfhound",
+        "Irish wolfhound",
+        "Italian greyhound",
+        "whippet",
+        "Ibizan hound, Ibizan Podenco",
+        "Norwegian elkhound, elkhound",
+        "otterhound, otter hound",
+        "Saluki, gazelle hound",
+        "Scottish deerhound, deerhound",
+        "Weimaraner",
+        "Staffordshire bullterrier, Staffordshire bull terrier",
+        "American Staffordshire terrier, Staffordshire terrier, American pit bull terrier, pit bull terrier",
+        "Bedlington terrier",
+        "Border terrier",
+        "Kerry blue terrier",
+        "Irish terrier",
+        "Norfolk terrier",
+        "Norwich terrier",
+        "Yorkshire terrier",
+        "wire-haired fox terrier",
+        "Lakeland terrier",
+        "Sealyham terrier, Sealyham",
+        "Airedale, Airedale terrier",
+        "cairn, cairn terrier",
+        "Australian terrier",
+        "Dandie Dinmont, Dandie Dinmont terrier",
+        "Boston bull, Boston terrier",
+        "miniature schnauzer",
+        "giant schnauzer",
+        "standard schnauzer",
+        "Scotch terrier, Scottish terrier, Scottie",
+        "Tibetan terrier, chrysanthemum dog",
+        "silky terrier, Sydney silky",
+        "soft-coated wheaten terrier",
+        "West Highland white terrier",
+        "Lhasa, Lhasa apso",
+        "flat-coated retriever",
+        "curly-coated retriever",
+        "golden retriever",
+        "Labrador retriever",
+        "Chesapeake Bay retriever",
+        "German short-haired pointer",
+        "vizsla, Hungarian pointer",
+        "English setter",
+        "Irish setter, red setter",
+        "Gordon setter",
+        "Brittany spaniel",
+        "clumber, clumber spaniel",
+        "English springer, English springer spaniel",
+        "Welsh springer spaniel",
+        "cocker spaniel, English cocker spaniel, cocker",
+        "Sussex spaniel",
+        "Irish water spaniel",
+        "kuvasz",
+        "schipperke",
+        "groenendael",
+        "malinois",
+        "briard",
+        "kelpie",
+        "komondor",
+        "Old English sheepdog, bobtail",
+        "Shetland sheepdog, Shetland sheep dog, Shetland",
+        "collie",
+        "Border collie",
+        "Bouvier des Flandres, Bouviers des Flandres",
+        "Rottweiler",
+        "German shepherd, German shepherd dog, German police dog, alsatian",
+        "Doberman, Doberman pinscher",
+        "miniature pinscher",
+        "Greater Swiss Mountain dog",
+        "Bernese mountain dog",
+        "Appenzeller",
+        "EntleBucher",
+        "boxer",
+        "bull mastiff",
+        "Tibetan mastiff",
+        "French bulldog",
+        "Great Dane",
+        "Saint Bernard, St Bernard",
+        "Eskimo dog, husky",
+        "malamute, malemute, Alaskan malamute",
+        "Siberian husky",
+        "dalmatian, coach dog, carriage dog",
+        "affenpinscher, monkey pinscher, monkey dog",
+        "basenji",
+        "pug, pug-dog",
+        "Leonberg",
+        "Newfoundland, Newfoundland dog",
+        "Great Pyrenees",
+        "Samoyed, Samoyede",
+        "Pomeranian",
+        "chow, chow chow"
+    )
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
@@ -98,6 +224,8 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         }
 
         personView = fragmentCameraBinding.PersonView
+        statsView = fragmentCameraBinding.StatsView
+
     }
 
     // Initialize CameraX, and prepare to bind the camera use cases
@@ -165,8 +293,27 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         super.onConfigurationChanged(newConfig)
         imageAnalyzer?.targetRotation = fragmentCameraBinding.viewFinder.display.rotation
     }
+    private fun isWithinTimeRange(): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = currentTime
+
+        val startHour = 7
+        val endHour = 21
+
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        Log.d("APP", "Time: $currentHour")
+
+
+        return currentHour in startHour..endHour
+    }
 
     private fun detectObjects(image: ImageProxy) {
+        if (!isWithinTimeRange()) {
+            // Do not perform inference outside the specified time range
+            personView.text = "Good night!"
+            return
+        }
         if (!::bitmapBuffer.isInitialized) {
             // The image rotation and RGB image buffer are initialized only once
             // the analyzer has started running
@@ -185,10 +332,13 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
     }
 
+
     // Update UI after objects have been detected. Extracts original image height/width
     // to scale and place bounding boxes properly through OverlayView
+
     override fun onObjectDetectionResults(
         results: MutableList<Detection>?,
+        outputs: EfficientnetLite0Fp322.Outputs,
         inferenceTime: Long,
         imageHeight: Int,
         imageWidth: Int
@@ -200,17 +350,90 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
                 imageHeight,
                 imageWidth
             )
-            
+            val probability = outputs.probabilityAsCategoryList
+            val top5Probabilities = probability.sortedByDescending { it.score }.take(2)
+            // Log.d("APP", top5Probabilities.toString())
+            var isPetDetected = false
+
+            for (result in top5Probabilities) {
+                if (dogList.any { it.contains(result.label, ignoreCase = true) }) {
+                    Log.d("APP", "Label: ${result.label}, Probability: ${result.score}")
+                    isPetDetected = true
+                }
+            }
+
+
+            // Log.d("APP", "isPetdetected: ${isPetDetected}")
+
+            for (result in top5Probabilities) {
+                if (dogList.any { result.label.contains(it, ignoreCase = true) }) {
+                    //Log.d("APP", "Label: ${result.label}, Probability: ${result.score}, isPetdetected: ${isPetDetected}")
+                }
+            }
             // find at least one bounding box of the person
             val isPersonDetected: Boolean = results!!.find { it.categories[0].label == "tv" } != null
-            
+            var heard_sounds = false
+
+            var currentTime = System.currentTimeMillis()
+            var elapsedTime = currentTime - petDetectionStartTime
+            var isPetInFrameForOneMinute = elapsedTime >= 6000
+
+
             // change UI according to the result
-            if (isPersonDetected) {
-                personView.text = "Fire image detected!"
+            if (isPetDetected) {
+                if (GlobalVariables.myGlobalVariable == "Sounds!" && !heard_sounds)  {
+                    heard_sounds = true
+                }
+                personView.text = "A pet detected!"
+
+
+                var stats = statsView.text
+                var lines = stats.split("\n")
+                var fed = lines[0].split(": ")[1].toInt()
+                var asked = lines[1].split(": ")[1].toInt()
+                // Log.d("APP2", "Fed, asked: ${fed}, ${asked}")
+
+                Log.d("APP22", have_seen_the_dog.toString())
+
                 personView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.activeTextColor)
+
+
+                if (isPetInFrameForOneMinute and heard_sounds) {
+                    if(!have_seen_the_dog) {
+                        asked += 1
+                        statsView.text = "№ fed: $fed\n№ asked: $asked"
+                        have_seen_the_dog = true
+                    }
+
+                    if((fed <3)){
+
+                        val currentTime = System.currentTimeMillis()
+                        val timeDifference = currentTime - lastUpdateTime
+//                        val sixHoursInMillis = 6 * 60 * 60 * 1000 // Conv
+                        val sixHoursInMillis = 10 * 1000 // Conv
+
+
+                        if((fed == 0 )or (timeDifference >= sixHoursInMillis)){
+                            fed += 1
+                            lastUpdateTime = System.currentTimeMillis()
+                            //Log.d("APP2", checkIfSixHoursPassed(last_fed).toString())
+
+                            personView.text = "Feeding the pet"
+                            personView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
+                            personView.setTextColor(ProjectConfiguration.activeTextColor)
+                            statsView.text = "№ fed: $fed\n№ asked: $asked"
+                        }
+
+                    }
+
+                }
+
             } else {
-                personView.text = "All calm, no fire yet!"
+                have_seen_the_dog = false
+                petDetectionStartTime = System.currentTimeMillis()
+                heard_sounds = false
+                personView.text = "No pet here!"
                 personView.setBackgroundColor(ProjectConfiguration.idleBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.idleTextColor)
             }

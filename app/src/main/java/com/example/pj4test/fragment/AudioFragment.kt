@@ -9,7 +9,11 @@ import androidx.fragment.app.Fragment
 import com.example.pj4test.ProjectConfiguration
 import com.example.pj4test.audioInference.SnapClassifier
 import com.example.pj4test.databinding.FragmentAudioBinding
-
+class GlobalVariables {
+    companion object {
+        var myGlobalVariable: String = "No sounds!"
+    }
+}
 class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
     private val TAG = "AudioFragment"
 
@@ -57,11 +61,12 @@ class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
     override fun onResults(score: Float) {
         activity?.runOnUiThread {
             if (score > SnapClassifier.THRESHOLD) {
-                snapView.text = "SNAP"
+                GlobalVariables.myGlobalVariable = "Sounds!"
+                snapView.text = "I am hearing animal sounds!"
                 snapView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 snapView.setTextColor(ProjectConfiguration.activeTextColor)
             } else {
-                snapView.text = "NO SNAP"
+                snapView.text = "No animal sounds detected"
                 snapView.setBackgroundColor(ProjectConfiguration.idleBackgroundColor)
                 snapView.setTextColor(ProjectConfiguration.idleTextColor)
             }

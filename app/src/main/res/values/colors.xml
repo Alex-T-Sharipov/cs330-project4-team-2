@@ -15,4 +15,7 @@
     <color name="icActive">#FFFFFFFF</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>
+    <color name="pastel_background">#F5F5DC</color>
+    <color name="pastel_text">#5D5D5D</color>
+    <color name="active">#FF9800</color>
 </resources>
