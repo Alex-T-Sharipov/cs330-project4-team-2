@@ -454,9 +454,10 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     fun dispenseFood() {
         try {
             val command = "DISPENSE"
+            Log.d("BLUETOOTH", "sent the command")
             GlobalSocket.myGlobalSocket.outputStream.write(command.toByteArray())
         } catch (e: Exception) {
-            Log.d("TAG", "couldn't send command")
+            Log.d("BLUETOOTH", "couldn't send command")
             return
         }
     }
