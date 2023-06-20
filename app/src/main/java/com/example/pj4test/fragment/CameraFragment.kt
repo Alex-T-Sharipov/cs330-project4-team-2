@@ -300,7 +300,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         calendar.timeInMillis = currentTime
 
         val startHour = 7
-        val endHour = 20
+        val endHour = 22
 
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         Log.d("APP", "Time: $currentHour")
@@ -338,7 +338,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     // to scale and place bounding boxes properly through OverlayView
 
     override fun onObjectDetectionResults(
-        results: MutableList<Detection>?,
+        // results: MutableList<Detection>?,
         outputs: EfficientnetLite0Fp322.Outputs,
         inferenceTime: Long,
         imageHeight: Int,
@@ -346,11 +346,11 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     ) {
         activity?.runOnUiThread {
             // Pass necessary information to OverlayView for drawing on the canvas
-            fragmentCameraBinding.overlay.setResults(
-                results ?: LinkedList<Detection>(),
-                imageHeight,
-                imageWidth
-            )
+//            fragmentCameraBinding.overlay.setResults(
+//                results ?: LinkedList<Detection>(),
+//                imageHeight,
+//                imageWidth
+//            )
             val probability = outputs.probabilityAsCategoryList
             val top5Probabilities = probability.sortedByDescending { it.score }.take(2)
             // Log.d("APP", top5Probabilities.toString())
@@ -372,7 +372,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
                 }
             }
             // find at least one bounding box of the person
-            val isPersonDetected: Boolean = results!!.find { it.categories[0].label == "tv" } != null
+            //val isPersonDetected: Boolean = results!!.find { it.categories[0].label == "tv" } != null
             var heard_sounds = false
 
             var currentTime = System.currentTimeMillis()

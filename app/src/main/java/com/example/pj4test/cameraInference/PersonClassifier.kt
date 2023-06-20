@@ -97,11 +97,11 @@ class PersonClassifier {
 // Releases model resources if no longer used.
 
 
-        val results = objectDetector.detect(tensorImage)
+        // val results = objectDetector.detect(tensorImage)
 //        val results = outputs
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
         objectDetectorListener?.onObjectDetectionResults(
-            results,
+            // results,
             outputs,
             inferenceTime,
             tensorImage.height,
@@ -112,7 +112,7 @@ class PersonClassifier {
 
         fun onObjectDetectionError(error: String)
         fun onObjectDetectionResults(
-            results: MutableList<Detection>?,
+            // results: MutableList<Detection>?,
             outputs: EfficientnetLite0Fp322.Outputs,
             inferenceTime: Long,
             imageHeight: Int,
