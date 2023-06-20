@@ -23,7 +23,20 @@ class SnapClassifier {
 
     // TimerTask
     private var task: TimerTask? = null
+    private fun isWithinTimeRange(): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = currentTime
 
+        val startHour = 7
+        val endHour = 21
+
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        Log.d("APP", "Time: $currentHour")
+
+
+        return currentHour in startHour..endHour
+    }
     /**
      * initialize
      *
@@ -95,6 +108,10 @@ class SnapClassifier {
      * @return  A score of the maximum float value among three classes
      */
     fun inference(): Float {
+        if (!isWithinTimeRange()) {
+            // Do not perform inference outside the specified time range
+            return -1.0f
+        }
         tensor.load(recorder)
         // Log.d(TAG, tensor.tensorBuffer.shape.joinToString(","))
         val output = classifier.classify(tensor)

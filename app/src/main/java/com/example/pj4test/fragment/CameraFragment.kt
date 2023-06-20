@@ -300,7 +300,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         calendar.timeInMillis = currentTime
 
         val startHour = 7
-        val endHour = 21
+        val endHour = 20
 
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         Log.d("APP", "Time: $currentHour")
