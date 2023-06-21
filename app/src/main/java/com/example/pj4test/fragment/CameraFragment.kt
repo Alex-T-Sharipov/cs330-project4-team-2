@@ -300,7 +300,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         calendar.timeInMillis = currentTime
 
         val startHour = 7
-        val endHour = 22
+        val endHour = 20
 
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         Log.d("APP", "Time: $currentHour")
@@ -401,7 +401,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
 
                 if (isPetInFrameForOneMinute and heard_sounds) {
-                    if(!have_seen_the_dog) {
+                    if(!have_seen_the_dog and (fed >=3)) {
                         asked += 1
                         statsView.text = "№ fed: $fed\n№ asked: $asked"
                         have_seen_the_dog = true
@@ -416,6 +416,8 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
 
                         if((fed == 0 )or (timeDifference >= sixHoursInMillis)){
+                            asked += 1
+                            statsView.text = "№ fed: $fed\n№ asked: $asked"
                             fed += 1
                             dispenseFood();
                             lastUpdateTime = System.currentTimeMillis()
