@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.service.autofill.Validators.and
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -75,6 +76,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     private var camera: Camera? = null
     var lastUpdateTime: Long = System.currentTimeMillis()// The timestamp of the last variable update
     var petDetectionStartTime = System.currentTimeMillis()
+    var decremented = false
     val dogList = listOf(
         "Chihuahua",
         "Japanese spaniel",
@@ -402,6 +404,10 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
 
                 if (isPetInFrameForOneMinute and heard_sounds) {
                     if(!have_seen_the_dog and (fed >=3)) {
+                        if ((asked == 3) and (!decremented)) {
+                            decremented = true
+                            asked -= 1
+                        }
                         asked += 1
                         statsView.text = "№ fed: $fed\n№ asked: $asked"
                         have_seen_the_dog = true
